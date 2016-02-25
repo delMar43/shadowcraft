@@ -1,6 +1,9 @@
 package shadowcraft;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
@@ -24,26 +27,34 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 
-import shadowcraft.data.MapReader;
+import shadowcraft.data.MapDefReader;
+import shadowcraft.data.PropDefReader;
 import shadowcraft.dto.GridPoint;
 import shadowcraft.dto.MapDef;
+import shadowcraft.dto.MapLayer;
+import shadowcraft.dto.PropDef;
 import shadowcraft.dto.PropInstance;
+import shadowcraft.dto.PropRender;
+import shadowcraft.dto.PropView;
+import shadowcraft.dto.RenderBounds;
 
 public class Sandbox implements ApplicationListener {
 
   private MapDef mapDef;
+  private Map<String, PropDef> propMap;
+
   public OrthographicCamera cam;
   public ModelBatch modelBatch;
-  public Model model;
-  public ModelInstance instance;
+  public List<ModelInstance> instances;
   public Environment environment;
   public Controller camController;
   public ShapeRenderer shapeRenderer;
   final Matrix4 matrix = new Matrix4();
 
   public Sandbox() {
-    mapDef = MapReader.INSTANCE
+    mapDef = MapDefReader.INSTANCE
         .loadMap("C:\\Users\\martin\\Documents\\Shadowrun Hong Kong\\ContentPacks\\Shadowminer\\data\\maps\\First.srm.txt");
+    propMap = PropDefReader.INSTANCE.loadPropDefs("C:\\Users\\martin\\shadowcraft\\data\\props\\");
   }
 
   public static void main(String[] args) {
@@ -101,25 +112,57 @@ public class Sandbox implements ApplicationListener {
     }
     shapeRenderer.end();
 
-    shapeRenderer.begin(ShapeType.Filled);
-    for (PropInstance prop : mapDef.getProps().values()) {
-      if (prop.getName().equals("\"warehouse_floor_21\"")) {
-        shapeRenderer.setColor(Color.GREEN);
-      } else {
-        shapeRenderer.setColor(Color.YELLOW);
-      }
-      GridPoint gridPoint = prop.getGridPoint();
-      float x = (float) (gridPoint.getX() * size);
-      float z = (float) (gridPoint.getZ() * size);
-      shapeRenderer.circle(x, z, size);
-    }
-    shapeRenderer.end();
+    //    shapeRenderer.begin(ShapeType.Filled);
+    //    for (PropInstance prop : mapDef.getProps()) {
+    //      if (prop.getName().equals("\"warehouse_floor_21\"")) {
+    //        shapeRenderer.setColor(Color.GREEN);
+    //      } else {
+    //        shapeRenderer.setColor(Color.YELLOW);
+    //      }
+    //      GridPoint gridPoint = prop.getGridPoint();
+    //      float x = (float) (gridPoint.getX() * size);
+    //      float z = (float) (gridPoint.getZ() * size);
+    //      shapeRenderer.circle(x, z, size);
+    //    }
+    //    shapeRenderer.end();
   }
 
   private void createModels() {
+    instances = new ArrayList<>();
     ModelBuilder modelBuilder = new ModelBuilder();
-    model = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(Color.GREEN)), Usage.Position | Usage.Normal);
-    instance = new ModelInstance(model);
+    List<PropInstance> props = mapDef.getProps();
+
+    for (PropInstance prop : props) {
+      PropDef propDef = propMap.get(prop.getName());
+      if (propDef != null) {
+        PropView view = propDef.getViews().get(prop.getOrientation());
+        if (view != null) {
+          PropRender render = view.getRender();
+          RenderBounds bounds = render.getBounds();
+          if (bounds != null) {
+            Material mat;
+            if (propDef.getMapLayer() == MapLayer.MAPLAYER_PROPS) {
+              mat = new Material(ColorAttribute.createDiffuse(Color.GREEN));
+            } else {
+              mat = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+            }
+            Model model = modelBuilder.createBox(bounds.getWidth(), bounds.getHeight(), bounds.getDepth(), mat,
+                Usage.Position | Usage.Normal);
+            GridPoint gp = prop.getGridPoint();
+            Vector3 pos = new Vector3(gp.getX(), gp.getY(), gp.getZ());
+            instances.add(new ModelInstance(model, pos));
+            System.out.println("model added");
+          } else {
+            System.out.println("no bounds");
+          }
+        } else {
+          System.out.println("no view");
+        }
+      } else {
+        System.out.println("no prop def for '" + prop.getName() + "'");
+      }
+    }
+
   }
 
   private void createInputProcessor() {
@@ -159,7 +202,7 @@ public class Sandbox implements ApplicationListener {
 
   private void drawMap() {
     modelBatch.begin(cam);
-    modelBatch.render(instance, environment);
+    modelBatch.render(instances, environment);
     modelBatch.end();
   }
 
@@ -176,6 +219,5 @@ public class Sandbox implements ApplicationListener {
   @Override
   public void dispose() {
     modelBatch.dispose();
-    model.dispose();
   }
 }

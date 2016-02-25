@@ -9,7 +9,7 @@ public class PropInstance {
 
   public PropInstance(String idRef, String name, GridPoint gridPoint, Orientation orientation) {
     this.idRef = idRef;
-    this.name = name;
+    this.name = name.replace("\"", "");
     this.gridPoint = gridPoint;
     this.orientation = orientation;
   }
@@ -29,4 +29,5 @@ public class PropInstance {
   public Orientation getOrientation() {
     return orientation;
   }
+
 }

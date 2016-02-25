@@ -1,26 +1,31 @@
 package shadowcraft.dto;
 
+/**
+ * It's really a vector.
+ * @author martin
+ *
+ */
 public class GridPoint {
 
-  private double x;
-  private double y;
-  private double z;
+  private float x;
+  private float y;
+  private float z;
 
-  public GridPoint(double x, double y, double z) {
+  public GridPoint(float x, float y, float z) {
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
-  public double getX() {
+  public float getX() {
     return x;
   }
 
-  public double getY() {
+  public float getY() {
     return y;
   }
 
-  public double getZ() {
+  public float getZ() {
     return z;
   }
 }

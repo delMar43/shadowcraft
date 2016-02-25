@@ -1,18 +1,21 @@
 package shadowcraft.data;
 
+import java.util.Map;
+
 import org.junit.Test;
 
-import shadowcraft.dto.MapDef;
+import shadowcraft.dto.PropDef;
 
-public class MapReaderTest {
+public class PropDefReaderTest {
 
-  private MapDefReader reader = MapDefReader.INSTANCE;
+  private PropDefReader reader = PropDefReader.INSTANCE;
 
   @Test
-  public void readmap() {
+  public void read() {
+    memOutput();
     long start = System.currentTimeMillis();
-    MapDef mapDef = reader.loadMap("C:\\Users\\martin\\shadowcraft\\data\\maps\\a2_falseflag_s2.srm.txt");
-    System.out.println("Done after " + (System.currentTimeMillis() - start) + " ms");
+    Map<String, PropDef> result = reader.loadPropDefs("C:\\Users\\martin\\shadowcraft\\data\\props");
+    System.out.println("Done after " + (System.currentTimeMillis() - start) + " ms: " + result.size() + " props.");
     memOutput();
   }
 

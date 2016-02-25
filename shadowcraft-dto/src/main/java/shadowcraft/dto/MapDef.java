@@ -1,7 +1,7 @@
 package shadowcraft.dto;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 public class MapDef {
 
@@ -9,14 +9,14 @@ public class MapDef {
   private int minZ;
   private int numX;
   private int numZ;
-  private Map<String, PropInstance> props;
+  private List<PropInstance> props;
 
-  public MapDef(int minX, int minZ, int numX, int numZ, Map<String, PropInstance> props) {
+  public MapDef(int minX, int minZ, int numX, int numZ, List<PropInstance> props) {
     this.minX = minX;
     this.minZ = minZ;
     this.numX = numX;
     this.numZ = numZ;
-    this.props = Collections.unmodifiableMap(props);
+    this.props = Collections.unmodifiableList(props);
   }
 
   public int getMinX() {
@@ -35,7 +35,7 @@ public class MapDef {
     return numZ;
   }
 
-  public Map<String, PropInstance> getProps() {
+  public List<PropInstance> getProps() {
     return props;
   }
 }
